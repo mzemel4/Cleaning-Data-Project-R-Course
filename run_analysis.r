@@ -29,10 +29,11 @@ extract_dir <- "./data/extract/"
 #Create string with full path name of the new extracted folder
 dirname <- list.files(extract_dir)
 fullpath <- paste0(extract_dir,dirname,"/")
-
+list.files(fullpath)
 #Read in File that contains the list of features, or the column headings for the 561 measures provided in the training and test data sets
 featurenames <- fread(paste0(fullpath,"features.txt"))
-
+activitynames <- fread(paste0(fullpath,"activity_labels.txt"))
+names(activitynames) <- c("activityid","activity")
 
 ########################, Combine Relevant Feature Data, Subject Data, Activity Data for Train and Test Datasets ################################################
 
@@ -66,7 +67,7 @@ names(subjectcol) <- "subject"
 activitycol <- fread(paste0(path,"y_",i,".txt"))
 
 #Name the column "activity"
-names(activitycol) <- "activity"
+names(activitycol) <- "activityid"
 
 #Combine all three data sources: subject data, activity data, feature data using column bind. 
 data <- cbind(subjectcol,activitycol,featuredata)
@@ -79,9 +80,7 @@ rm(data) ; rm(subjectcol); rm(activitycol) ; rm(featuredata)
 }
 ## Combine Training and Test Data Sets by stacking the traindata and testdata datasets
 full_data <- rbind(datatrain,datatest)
-rm(datatest)
-rm(datatrain)
-rm(featurenames)
+rm(datatest); rm(datatrain); rm(featurenames)
 ## Split into two datasets by column, one with mean data and one with std data
 
 mean_indices <- grep("(.*)mean\\()",names(full_data))
@@ -91,16 +90,19 @@ mean_data <- full_data %>% select(c(1,2),all_of(mean_indices))
 std_data <- full_data %>% select(c(1,2),all_of(std_indices))
 rm(full_data)
 ##Reshape
-melt_mean_data <- melt(mean_data,id=c("subject","activity"),value.name="mean")
-melt_std_data <- melt(std_data,id=c("subject","activity"),value.name="std")
+melt_mean_data <- melt(mean_data,id=c("subject","activityid"),value.name="mean")
+melt_std_data <- melt(std_data,id=c("subject","activityid"),value.name="std")
 ##Fix variable names to remove the reference to mean() and remove "_" and to make lowercase
 melt_mean_data$variable <- tolower(gsub("-mean\\()|-","",melt_mean_data$variable))
 melt_std_data <- melt_std_data %>% select(std)
-#melt_std_data <- melt_std_data[,!(names(melt_std_data) %in% c("subject","activity"))]
-rm(mean_data)
-rm(std_data)
-## Merge Mean and Std Datasets back to form one tidy data set
+#melt_std_data <- melt_std_data[,!(names(melt_std_data) %in% c("subject","activityid"))]
+rm(mean_data) ; rm(std_data)
+
+## Combine Mean and Std Datasets back to form one tidy data set
 tidy_data <- cbind(melt_mean_data,melt_std_data)
+tidy_data <- merge(tidy_data,activitynames,by.x="activityid",by.y="activityid",all.x=TRUE)
+## Create an additional dataset that has the average mean and the average std. of each measure for each subject, activity pair
 means_data <- tidy_data %>% group_by(subject,activity,variable) %>% summarize(avgmean = mean(mean),avgstd = mean(std))
-rm(melt_mean_data)
-rm(melt_std_data)
+
+#Remove datasets that are no longer needed
+rm(melt_mean_data) ; rm(melt_std_data)
