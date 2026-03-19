@@ -16,12 +16,12 @@ The means_data dataset provides the *average* mean and *average* standard deviat
 
 **activity**: Name of activity performed, string variable with the following values:
 
-* LAYING
-* SITTING
-* STANDING
-* WALKING
-* WALKING_DOWNSTAIRS
-* WALKING_UPSTAIRS
+* laying
+* sitting
+* standing
+* walking
+* walking_downstairs
+* walking_upstairs
 
 **variable**: variable measured, given component of accelerometer measurement, across both the time (t) and frequency (f) domains and measured in the x,y, and z planes.  String variable with 33 different values:
 
