@@ -118,6 +118,18 @@ tidy_data <- tidy_data %>% select(subject,activity,variable,mean,std)
 
 ## Create an additional dataset that has the average mean and the average std. of each measure for each subject, activity pair
 means_data <- tidy_data %>% group_by(subject,activity,variable) %>% summarize(avgmean = mean(mean),avgstd = mean(std))
+print(paste(c("Means table has",nrow(means_data),"rows")))
 
 #Remove datasets that are no longer needed
 rm(melt_mean_data) ; rm(melt_std_data)
+
+#Output a text file with the means tidy dataset to the ./data directory
+write.table(means_data,"./data/means_data.txt",row.names=FALSE)
+
+#Check dimension of means data set: subjects * activities * variables
+summary(means_data$subject)
+ns <- 30 #from summary above
+na <- 6 #from reading activiy file
+nv <- 33 #from dimension of mean_indices and mean_std vector
+print(paste0("s*a*v=",ns*na*nv))
+print(paste0("number of rows of means data = ",nrow(means_data)))
