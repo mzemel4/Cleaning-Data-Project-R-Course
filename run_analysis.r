@@ -112,9 +112,10 @@ rm(mean_data) ; rm(std_data)
 ## Combine Mean and Std Datasets back to form one tidy data set
 tidy_data <- cbind(melt_mean_data,melt_std_data)
 
-##Add in activity names using the activity names mapping of activity id to activity name
+##Add in activity names using the activity names mapping of activity id to activity name, make activity names lowercase
 tidy_data <- merge(tidy_data,activitynames,by.x="activityid",by.y="activityid",all.x=TRUE)
 tidy_data <- tidy_data %>% select(subject,activity,variable,mean,std)
+tidy_data <- tidy_data %>% mutate(activity = tolower(activity))
 
 ## Create an additional dataset that has the average mean and the average std. of each measure for each subject, activity pair
 means_data <- tidy_data %>% group_by(subject,activity,variable) %>% summarize(avgmean = mean(mean),avgstd = mean(std))
