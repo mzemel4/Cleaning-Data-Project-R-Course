@@ -6,7 +6,7 @@ This repository contains the files needed to create the tidy data set *means_dat
 ### Files
 This repository contains the following files
 
-* tidy data set: **means_data.txt**
+* tidy data set: **data/means_data.txt**
 
 * Codebook for means_data tidy data set: **codebook.md**
 
@@ -17,7 +17,7 @@ This repository contains the following files
     *  **features.txt**
     * **features_info.txt**
     * **activity_labels.txt**
-    * **test/X_test.txt**
+      * **test/X_test.txt**
     * **test/subject_test.txt**
     * **test/y_test.txt**
     * **train/X_train.txt**
