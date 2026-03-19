@@ -55,7 +55,7 @@ featuredata <- fread(paste0(path,"X_",i,".txt"))
 names(featuredata) <- featurenames$V2
 
 #Select desired columns of feature data using previously identified column numbers for only the mean() and std() columns of each measurement
-featuredata <- featuredata %>% select(colnums)
+featuredata <- featuredata %>% select(all_of(colnums))
 
 #Read in subject data that matches the feature data
 subjectcol <- fread(paste0(path,"subject_",i,".txt"))
@@ -80,7 +80,13 @@ rm(data) ; rm(subjectcol); rm(activitycol) ; rm(featuredata)
 }
 ## Combine Training and Test Data Sets by stacking the traindata and testdata datasets
 full_data <- rbind(datatrain,datatest)
+
+#Delete temporary datasets no longer needed
 rm(datatest); rm(datatrain); rm(featurenames)
+
+################################ Make Long Datasets for: 1) Mean variables and 2) Std. deviation variables ######################################################
+################################ Long datasets will have the following columns: subject, activity,variable, measure (mean or std) ###############################
+
 ## Split into two datasets by column, one with mean data and one with std data
 
 mean_indices <- grep("(.*)mean\\()",names(full_data))
@@ -88,19 +94,28 @@ std_indices <- grep("(.*)std\\()",names(full_data))
 
 mean_data <- full_data %>% select(c(1,2),all_of(mean_indices))
 std_data <- full_data %>% select(c(1,2),all_of(std_indices))
+
+#Delete temporary datasets no longer needed
 rm(full_data)
-##Reshape
+
+## Reshape to create long dataset from wide dataset. Rows will represent a subject, activity, variable with a value given for the measurement type (mean or std)
+## Do this once for mean data variables and once for std data variables
 melt_mean_data <- melt(mean_data,id=c("subject","activityid"),value.name="mean")
 melt_std_data <- melt(std_data,id=c("subject","activityid"),value.name="std")
-##Fix variable names to remove the reference to mean() and remove "_" and to make lowercase
+
+##Fix variable names to remove the reference to mean() and remove "_" and to make lowercase, resulting variables are 'tbodyaccx','tbodygyrojerky' , etc.
 melt_mean_data$variable <- tolower(gsub("-mean\\()|-","",melt_mean_data$variable))
+##Both the mean and std datasets have the same values in the same order for subject, activity, and variable, Keep these variables from mean dataset, add the std measure from std dataset
 melt_std_data <- melt_std_data %>% select(std)
-#melt_std_data <- melt_std_data[,!(names(melt_std_data) %in% c("subject","activityid"))]
 rm(mean_data) ; rm(std_data)
 
 ## Combine Mean and Std Datasets back to form one tidy data set
 tidy_data <- cbind(melt_mean_data,melt_std_data)
+
+##Add in activity names using the activity names mapping of activity id to activity name
 tidy_data <- merge(tidy_data,activitynames,by.x="activityid",by.y="activityid",all.x=TRUE)
+tidy_data <- tidy_data %>% select(subject,activity,variable,mean,std)
+
 ## Create an additional dataset that has the average mean and the average std. of each measure for each subject, activity pair
 means_data <- tidy_data %>% group_by(subject,activity,variable) %>% summarize(avgmean = mean(mean),avgstd = mean(std))
 
