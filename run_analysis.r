@@ -128,8 +128,8 @@ write.table(means_data,"./data/means_data.txt",row.names=FALSE)
 
 #Check dimension of means data set: subjects * activities * variables
 summary(means_data$subject)
-ns <- 30 #from summary above
-na <- 6 #from reading activiy file
+ns <- 30 #from summary above and confirmed in the UCI HAR Readme file
+na <- 6 #from reading activity file and confirmed in Readme file
 nv <- 33 #from dimension of mean_indices and mean_std vector
 print(paste0("s*a*v=",ns*na*nv))
 print(paste0("number of rows of means data = ",nrow(means_data)))
