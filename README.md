@@ -17,7 +17,7 @@ This repository contains the following files
     *  **features.txt**
     * **features_info.txt**
     * **activity_labels.txt**
-      * **test/X_test.txt**
+    * **test/X_test.txt**
     * **test/subject_test.txt**
     * **test/y_test.txt**
     * **train/X_train.txt**
